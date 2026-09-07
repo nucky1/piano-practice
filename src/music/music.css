@@ -1,0 +1,364 @@
+.music-term {
+  display: inline;
+  padding: 1px 5px;
+  border: 1px solid #3a3a42;
+  border-radius: 6px;
+  background: #25252c;
+  color: #a9d5ff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  vertical-align: baseline;
+}
+
+.music-term:hover {
+  background: #303d4b;
+  border-color: #5c83a8;
+}
+
+.music-term:focus-visible,
+.music-button:focus-visible,
+.music-icon-button:focus-visible {
+  outline: 2px solid #a9d5ff;
+  outline-offset: 3px;
+}
+
+.music-modal-open {
+  overflow: hidden;
+}
+
+.music-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(6px);
+}
+
+.music-modal-backdrop[hidden] {
+  display: none;
+}
+
+.music-modal {
+  width: min(100%, 720px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid #38383f;
+  border-radius: 22px;
+  background: #18181b;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .45);
+}
+
+.music-modal__header,
+.music-player__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.music-modal h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.music-modal__notes {
+  margin: 14px 0 20px;
+  color: #b9b9c0;
+}
+
+.music-icon-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #38383f;
+  border-radius: 10px;
+  background: #242428;
+  cursor: pointer;
+}
+
+.piano-keyboard {
+  width: 100%;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.piano-keyboard svg {
+  display: block;
+  width: 100%;
+  min-width: 300px;
+  height: auto;
+  max-height: 220px;
+  user-select: none;
+}
+
+.piano-key {
+  cursor: pointer;
+}
+
+.piano-key--white rect {
+  fill: #f5f5f4;
+  stroke: #8c8c93;
+  stroke-width: 1;
+}
+
+.piano-key--white text {
+  fill: #666670;
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.piano-key--black rect {
+  fill: #24242b;
+  stroke: #101014;
+  stroke-width: 1;
+}
+
+.piano-key--white.is-active rect {
+  fill: #8dc5f5;
+}
+
+.piano-key--black.is-active rect {
+  fill: #3b85c3;
+}
+
+.piano-key--white.is-left rect {
+  fill: #b7a0ef;
+}
+
+.piano-key--black.is-left rect {
+  fill: #795ab9;
+}
+
+.piano-key--white.is-right rect {
+  fill: #8dc5f5;
+}
+
+.piano-key--black.is-right rect {
+  fill: #3b85c3;
+}
+
+.music-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.music-button {
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid #3b3b43;
+  border-radius: 12px;
+  background: #242429;
+  color: #f5f5f5;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.music-button:hover {
+  background: #303036;
+}
+
+.music-button--primary {
+  background: #f3f3f3;
+  border-color: #f3f3f3;
+  color: #111;
+}
+
+.music-button--primary:hover {
+  background: #dcdcdc;
+}
+
+.music-help {
+  margin: 16px 0 0;
+  color: #92929b;
+  font-size: 13px;
+}
+
+.music-player {
+  margin: 24px 0;
+  padding: 22px;
+  border: 1px solid #34343b;
+  border-radius: 20px;
+  background: #17171a;
+  line-height: 1.5;
+}
+
+.music-player__header h3 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.music-player__header p:not(.eyebrow) {
+  margin: 8px 0 0;
+  color: #a7a7b0;
+  font-size: 14px;
+}
+
+.music-player__tempo {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #2a2a31;
+  color: #d5d5dc;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.music-player__keyboard {
+  margin: 22px 0 12px;
+}
+
+.music-player__timeline {
+  margin-top: 20px;
+}
+
+.music-player__timeline-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #a7a7b0;
+  font-size: 13px;
+}
+
+.music-player__steps {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.music-step {
+  flex: 0 0 auto;
+  min-width: 100px;
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #33333a;
+  border-radius: 12px;
+  background: #202024;
+  font-size: 13px;
+  transition: background .1s ease, border-color .1s ease;
+}
+
+.music-step.is-active {
+  border-color: #75aee0;
+  background: #25394b;
+}
+
+.music-step__beat {
+  color: #8e8e98;
+  font-size: 11px;
+}
+
+.music-step__hand {
+  color: #8e8e98;
+  font-size: 11px;
+}
+
+.music-player__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.music-tempo-control {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 160px;
+  color: #a7a7b0;
+  font-size: 12px;
+}
+
+.music-tempo-control input {
+  width: 100%;
+  accent-color: #a9d5ff;
+}
+
+.music-loop-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #b9b9c0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.music-player__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  color: #85858e;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.music-progress-track {
+  flex: 1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #303037;
+}
+
+.music-progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #a9d5ff;
+}
+
+.music-player__status {
+  margin: 14px 0 0;
+  color: #85858e;
+  font-size: 12px;
+}
+
+.music-exercise-error {
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px solid #8b3b3b;
+  border-radius: 12px;
+  background: #2a1b1b;
+  color: #ffb3b3;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .music-modal {
+    padding: 16px;
+  }
+
+  .music-player {
+    padding: 14px;
+  }
+
+  .music-player__header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .music-player__controls {
+    align-items: stretch;
+  }
+
+  .music-tempo-control {
+    flex-basis: 100%;
+    order: 3;
+  }
+}

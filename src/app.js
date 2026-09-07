@@ -1,3 +1,7 @@
+import { MusicExercisePlayer } from './music/player.js';
+import { openMusicModal, closeMusicModal } from './music/modal.js';
+import { musicEngine } from './music/engine.js';
+
 const sessions = JSON.parse(document.querySelector('#sessions-data')?.textContent || '[]')
   .sort((a, b) => {
     const byWeek = b.week.localeCompare(a.week, 'es', { numeric: true });
@@ -10,6 +14,7 @@ let completed = loadCompleted();
 let filter = 'all';
 let query = '';
 let currentSessionId = null;
+let players = [];
 
 const app = document.querySelector('#app');
 
@@ -61,6 +66,41 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function destroyPlayers() {
+  musicEngine.stop();
+  players.forEach((player) => player.destroy());
+  players = [];
+}
+
+function mountMusic(session) {
+  const article = app.querySelector('.markdown-body');
+  if (!article) return;
+
+  article.querySelectorAll('[data-exercise-index]').forEach((slot) => {
+    const index = Number(slot.dataset.exerciseIndex);
+    const exercise = session.exercises?.[index];
+    if (!exercise) return;
+
+    try {
+      const player = new MusicExercisePlayer(slot, exercise);
+      players.push(player);
+    } catch (error) {
+      slot.innerHTML = `<div class="music-exercise-error">${escapeHtml(error.message)}</div>`;
+    }
+  });
+
+  article.addEventListener('click', (event) => {
+    const term = event.target.closest('[data-music-type]');
+    if (!term) return;
+
+    openMusicModal({
+      type: term.dataset.musicType,
+      value: term.dataset.musicValue,
+      octave: Number(term.dataset.musicOctave ?? 4),
+    });
+  });
 }
 
 function renderList() {
@@ -181,6 +221,7 @@ function renderList() {
 
 function renderDetail(session) {
   const isDone = completed.has(session.id);
+
   app.innerHTML = `
     <main class="reader-shell">
       <nav class="reader-nav">
@@ -223,9 +264,14 @@ function renderDetail(session) {
   document.querySelector('#footer-complete')?.addEventListener('click', () => {
     toggleCompleted(session.id);
   });
+
+  mountMusic(session);
 }
 
 function render() {
+  destroyPlayers();
+  closeMusicModal();
+
   if (currentSessionId) {
     const session = sessions.find((item) => item.id === currentSessionId);
     if (session) {
@@ -233,7 +279,12 @@ function render() {
       return;
     }
   }
+
   renderList();
 }
+
+window.addEventListener('pagehide', () => {
+  musicEngine.stop();
+});
 
 render();

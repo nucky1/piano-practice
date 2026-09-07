@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { build as esbuild } from 'esbuild';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sessionsDir = path.join(root, 'sessions');
@@ -29,6 +30,7 @@ function cleanValue(value) {
 function parseFrontmatter(raw) {
   const normalized = raw.replace(/\r\n/g, '\n');
   if (!normalized.startsWith('---\n')) return { meta: {}, body: normalized };
+
   const end = normalized.indexOf('\n---\n', 4);
   if (end === -1) return { meta: {}, body: normalized };
 
@@ -46,11 +48,32 @@ function parseFrontmatter(raw) {
   return { meta, body };
 }
 
+function musicTermHtml(value) {
+  const trimmed = value.trim();
+
+  const chordPattern = /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus[24]?|add\d+|M)?\d*(?:[+#b0-9]*)?$/;
+  const spanishNotePattern = /^(Do|Re|Mi|Fa|Sol|La|Si)(?:#|b|♯|♭)?\d*$/i;
+
+  if (chordPattern.test(trimmed)) {
+    return `<button type="button" class="music-term" data-music-type="chord" data-music-value="${escapeHtml(trimmed)}">${escapeHtml(trimmed)}</button>`;
+  }
+
+  if (spanishNotePattern.test(trimmed)) {
+    return `<button type="button" class="music-term" data-music-type="note" data-music-value="${escapeHtml(trimmed)}">${escapeHtml(trimmed)}</button>`;
+  }
+
+  return `<code>${escapeHtml(value)}</code>`;
+}
+
 function inlineMarkdown(text) {
   let value = escapeHtml(text);
-  value = value.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Los términos musicales explícitos usan la sintaxis `Am`, `Do`, etc.
+  value = value.replace(/`([^`]+)`/g, (_, content) => musicTermHtml(content));
+
   value = value.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   value = value.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
   return value;
 }
 
@@ -61,7 +84,9 @@ function markdownToHtml(markdown) {
   let listType = null;
   let listItems = [];
   let codeLines = null;
+  let codeLanguage = '';
   let blockquote = [];
+  const exercises = [];
 
   const flushParagraph = () => {
     if (!paragraph.length) return;
@@ -89,11 +114,29 @@ function markdownToHtml(markdown) {
     flushBlockquote();
   };
 
+  const flushCode = () => {
+    const source = codeLines.join('\n');
+
+    if (codeLanguage === 'music-exercise') {
+      try {
+        const exercise = JSON.parse(source);
+        const index = exercises.push(exercise) - 1;
+        out.push(`<div class="music-exercise-slot" data-exercise-index="${index}"></div>`);
+      } catch (error) {
+        out.push(`<div class="music-exercise-error">Error en el ejercicio musical: ${escapeHtml(error.message)}</div>`);
+      }
+    } else {
+      out.push(`<pre><code>${escapeHtml(source)}</code></pre>`);
+    }
+
+    codeLines = null;
+    codeLanguage = '';
+  };
+
   for (const line of lines) {
     if (codeLines !== null) {
       if (line.trim().startsWith('```')) {
-        out.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
-        codeLines = null;
+        flushCode();
       } else {
         codeLines.push(line);
       }
@@ -102,6 +145,7 @@ function markdownToHtml(markdown) {
 
     if (line.trim().startsWith('```')) {
       flushAll();
+      codeLanguage = line.trim().slice(3).trim().split(/\s+/)[0];
       codeLines = [];
       continue;
     }
@@ -158,9 +202,10 @@ function markdownToHtml(markdown) {
     paragraph.push(line.trim());
   }
 
-  if (codeLines !== null) out.push(`<pre><code>${escapeHtml(codeLines.join('\n'))}</code></pre>`);
+  if (codeLines !== null) flushCode();
   flushAll();
-  return out.join('\n');
+
+  return { html: out.join('\n'), exercises };
 }
 
 function fallbackTitle(filename) {
@@ -192,6 +237,8 @@ async function build() {
     const duration = meta.duration || '30 min';
     const focus = meta.focus || '';
 
+    const rendered = markdownToHtml(body);
+
     sessions.push({
       id,
       filename,
@@ -201,7 +248,8 @@ async function build() {
       session,
       duration,
       focus,
-      html: markdownToHtml(body),
+      html: rendered.html,
+      exercises: rendered.exercises,
       searchText: `${title} ${week} ${song} ${focus} ${body}`.toLocaleLowerCase('es'),
     });
   }
@@ -209,11 +257,19 @@ async function build() {
   const template = await fs.readFile(path.join(root, 'index.html'), 'utf8');
   const html = template.replace('__SESSIONS_JSON__', escapeJsonForHtml(sessions));
 
-  await Promise.all([
-    fs.writeFile(path.join(distDir, 'index.html'), html),
-    fs.copyFile(path.join(root, 'src', 'style.css'), path.join(distDir, 'style.css')),
-    fs.copyFile(path.join(root, 'src', 'app.js'), path.join(distDir, 'app.js')),
-  ]);
+  await fs.writeFile(path.join(distDir, 'index.html'), html);
+  await fs.copyFile(path.join(root, 'src', 'style.css'), path.join(distDir, 'style.css'));
+  await fs.copyFile(path.join(root, 'src', 'music', 'music.css'), path.join(distDir, 'music.css'));
+
+  await esbuild({
+    entryPoints: [path.join(root, 'src', 'app.js')],
+    bundle: true,
+    platform: 'browser',
+    format: 'esm',
+    target: ['es2022'],
+    outfile: path.join(distDir, 'app.js'),
+    sourcemap: true,
+  });
 
   console.log(`Built ${sessions.length} piano sessions into ${path.relative(root, distDir)}/`);
 }

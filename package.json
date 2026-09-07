@@ -6,5 +6,12 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/dev.mjs"
+  },
+  "dependencies": {
+    "tonal": "^6.4.3",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }
