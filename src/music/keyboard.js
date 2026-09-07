@@ -1,18 +1,18 @@
-import { midiToNote, noteToMidi, noteLabel } from './theory.js';
+import { midiToNote, noteToMidi } from './theory.js';
 
 const WHITE_CLASSES = new Set([0, 2, 4, 5, 7, 9, 11]);
-const NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+
+const NOTE_NAMES = [
+  'Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa',
+  'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si',
+];
 
 function isWhite(midi) {
   return WHITE_CLASSES.has(((midi % 12) + 12) % 12);
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
+function toMidi(note) {
+  return typeof note === 'number' ? note : noteToMidi(note);
 }
 
 export class PianoKeyboard {
@@ -21,8 +21,12 @@ export class PianoKeyboard {
     this.minMidi = options.minMidi ?? 48;
     this.maxMidi = options.maxMidi ?? 84;
     this.onNote = options.onNote ?? null;
+
     this.active = new Set();
-    this.handNotes = { left: new Set(), right: new Set() };
+    this.handNotes = {
+      left: new Set(),
+      right: new Set(),
+    };
 
     this.render();
   }
@@ -46,8 +50,18 @@ export class PianoKeyboard {
 
       return `
         <g class="piano-key piano-key--white" data-midi="${midi}">
-          <rect x="${index * whiteWidth + 1}" y="1" width="38" height="128" rx="3" />
-          <text x="${index * whiteWidth + 20}" y="146" text-anchor="middle">${label}${octave}</text>
+          <rect
+            x="${index * whiteWidth + 1}"
+            y="1"
+            width="38"
+            height="128"
+            rx="3"
+          />
+          <text
+            x="${index * whiteWidth + 20}"
+            y="146"
+            text-anchor="middle"
+          >${label}${octave}</text>
         </g>
       `;
     }).join('');
@@ -64,9 +78,19 @@ export class PianoKeyboard {
     }).join('');
 
     this.container.innerHTML = `
-      <div class="piano-keyboard" role="group" aria-label="Teclado de piano">
-        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet"
-          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <div
+        class="piano-keyboard"
+        role="group"
+        aria-label="Teclado de piano"
+        style="width:100%;max-width:100%;min-width:0;overflow:hidden"
+      >
+        <svg
+          viewBox="0 0 ${width} ${height}"
+          preserveAspectRatio="xMidYMid meet"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          style="display:block;width:100%;max-width:100%;min-width:0;height:auto;max-height:none"
+        >
           ${whiteKeys}
           ${blackKeys}
         </svg>
@@ -84,15 +108,18 @@ export class PianoKeyboard {
   }
 
   setActive(notes = [], handNotes = null) {
-    this.active = new Set(notes.map((note) => noteToMidi(note)));
+    this.active = new Set(notes.map(toMidi));
 
     if (handNotes) {
       this.handNotes = {
-        left: new Set((handNotes.left || []).map(noteToMidi)),
-        right: new Set((handNotes.right || []).map(noteToMidi)),
+        left: new Set((handNotes.left || []).map(toMidi)),
+        right: new Set((handNotes.right || []).map(toMidi)),
       };
     } else {
-      this.handNotes = { left: new Set(), right: new Set() };
+      this.handNotes = {
+        left: new Set(),
+        right: new Set(),
+      };
     }
 
     this.update();

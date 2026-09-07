@@ -362,3 +362,58 @@
     order: 3;
   }
 }
+/* El reproductor nunca debe superar el ancho disponible. */
+.music-player,
+.music-player__keyboard,
+.music-player__timeline {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Teclado responsive: se escala, no tiene scroll horizontal. */
+.piano-keyboard {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.piano-keyboard svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+  max-height: none;
+}
+
+/* La secuencia sí puede desplazarse horizontalmente. */
+.music-player__steps {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.music-step {
+  flex: 0 0 auto;
+  min-width: 100px;
+}
+
+/* El paso que está sonando debe distinguirse claramente. */
+.music-step.is-active {
+  border-color: #75aee0;
+  background: #25394b;
+}
+
+.music-step__notes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
