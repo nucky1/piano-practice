@@ -147,6 +147,7 @@ export function normalizeExercise(raw) {
 
     const notes = event.notes.map((note) => normalizeNote(note));
     const hand = event.hand === 'left' ? 'left' : 'right';
+    const voice = event.voice === 'lead' ? 'lead' : 'piano';
 
     return {
       beat,
@@ -154,6 +155,7 @@ export function normalizeExercise(raw) {
       notes,
       midi: notes.map((note) => noteToMidi(note)),
       hand,
+      voice,
     };
   });
 

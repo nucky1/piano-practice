@@ -4,6 +4,7 @@ import { normalizeNote, normalizeExercise } from './theory.js';
 class MusicEngine {
   constructor() {
     this.instrument = null;
+    this.leadInstrument = null;
     this.ready = false;
     this.part = null;
     this.exercise = null;
@@ -58,6 +59,17 @@ class MusicEngine {
     }).toDestination();
 
     this.instrument.volume.value = -7;
+    this.leadInstrument = new Tone.Sampler({
+      urls: {
+        C4: 'C4.mp3',
+        'D#4': 'Ds4.mp3',
+        'F#4': 'Fs4.mp3',
+        A4: 'A4.mp3',
+      },
+      baseUrl: 'https://tonejs.github.io/audio/salamander/',
+      release: 0.7,
+    }).toDestination();
+    this.leadInstrument.volume.value = -10;
     await Tone.loaded();
     this.ready = true;
   }
@@ -193,10 +205,12 @@ class MusicEngine {
         time: (event.beat - this.startBeat) * 60 / this.tempo,
         notes: event.notes,
         duration: event.duration * 60 / this.tempo,
+        voice: event.voice,
       }));
 
     this.part = new Tone.Part((time, event) => {
-      this.instrument.triggerAttackRelease(
+      const instrument = event.voice === 'lead' ? this.leadInstrument : this.instrument;
+      instrument.triggerAttackRelease(
         event.notes,
         event.duration * 0.92,
         time
@@ -218,6 +232,7 @@ class MusicEngine {
     this.clearSchedule();
     Tone.getTransport().stop();
     this.instrument?.releaseAll();
+    this.leadInstrument?.triggerRelease();
 
     this.activeNotes = [];
     this.notify();
@@ -229,6 +244,7 @@ class MusicEngine {
     Tone.getTransport().stop();
     Tone.getTransport().cancel();
     this.instrument?.releaseAll();
+    this.leadInstrument?.triggerRelease();
 
     this.activeNotes = [];
     this.position = 0;
@@ -238,7 +254,9 @@ class MusicEngine {
   dispose() {
     this.stop();
     this.instrument?.dispose();
+    this.leadInstrument?.dispose();
     this.instrument = null;
+    this.leadInstrument = null;
     this.ready = false;
     this.listeners.clear();
   }
