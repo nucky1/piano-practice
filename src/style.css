@@ -16,3 +16,8 @@
 .session-card { cursor: pointer; }
 .session-card:focus-visible { outline: 2px solid #d8f36b; outline-offset: 3px; }
 .open-button { display: none; }
+.session-stepper { display: flex; align-items: center; gap: 10px; margin: 0 auto; color: #849084; font: 500 11px 'DM Mono', monospace; }
+.session-stepper button { padding: 8px 10px; border: 1px solid #303a32; background: #191c1a; color: #aab4a7; cursor: pointer; font: inherit; }
+.session-stepper button:hover:not(:disabled) { border-color: #d8f36b; color: #d8f36b; }
+.session-stepper button:disabled { cursor: not-allowed; opacity: .35; }
+@media (max-width: 640px) { .session-stepper { order: 3; width: 100%; justify-content: space-between; margin-top: 8px; } .reader-nav { flex-wrap: wrap; } }

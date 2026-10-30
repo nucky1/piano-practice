@@ -17,6 +17,35 @@ function getFilteredSessions() {
   const normalized = query.trim().toLocaleLowerCase('es');
   return sessions.filter((s) => { const done = completed.has(s.id); const text = !normalized || s.searchText.includes(normalized); const song = selectedSong === 'all' || s.song === selectedSong; const status = filter === 'all' || (filter === 'done' && done) || (filter === 'pending' && !done); return text && song && status; });
 }
+function sessionUrl(id) {
+  const url = new URL(window.location.href);
+  if (id) url.searchParams.set('session', id); else url.searchParams.delete('session');
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+function sessionIdFromUrl() {
+  const id = new URLSearchParams(window.location.search).get('session');
+  return sessions.some((session) => session.id === id) ? id : null;
+}
+function navigateToSession(id, { replace = false } = {}) {
+  currentSessionId = id;
+  window.history[replace ? 'replaceState' : 'pushState']({ session: id }, '', sessionUrl(id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  render();
+}
+function navigateToCatalog({ replace = false } = {}) {
+  currentSessionId = null;
+  window.history[replace ? 'replaceState' : 'pushState']({}, '', sessionUrl(null));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  render();
+}
+function navigateBetweenSessions(direction) {
+  const current = sessions.find((session) => session.id === currentSessionId);
+  if (!current) return;
+  const songSessions = sessions.filter((session) => session.song === current.song).sort((a, b) => a.session - b.session);
+  const index = songSessions.findIndex((session) => session.id === current.id);
+  const next = songSessions[index + direction];
+  if (next) navigateToSession(next.id);
+}
 function destroyPlayers() { musicEngine.stop(); players.forEach((p) => p.destroy()); players = []; }
 function mountMusic(session) {
   const article = app.querySelector('.markdown-body'); if (!article) return;
@@ -56,13 +85,49 @@ function renderList() {
    });
  }
 
+ function activateReaderNavigation() {
+   const nav = app.querySelector('.reader-nav');
+   if (!nav || nav.dataset.navigationBound) return;
+   const current = sessions.find((session) => session.id === currentSessionId);
+   if (!current) return;
+   const songSessions = sessions.filter((session) => session.song === current.song).sort((a, b) => a.session - b.session);
+   const index = songSessions.findIndex((session) => session.id === current.id);
+   const stepper = document.createElement('div');
+   stepper.className = 'session-stepper';
+   stepper.innerHTML = `<button type="button" data-session-step="prev" ${index <= 0 ? 'disabled' : ''}>← Anterior</button><span>${index + 1} / ${songSessions.length}</span><button type="button" data-session-step="next" ${index >= songSessions.length - 1 ? 'disabled' : ''}>Siguiente →</button>`;
+   stepper.querySelector('[data-session-step="prev"]')?.addEventListener('click', () => navigateBetweenSessions(-1));
+   stepper.querySelector('[data-session-step="next"]')?.addEventListener('click', () => navigateBetweenSessions(1));
+   nav.insertBefore(stepper, nav.querySelector('.check-wrap--reader'));
+   nav.dataset.navigationBound = 'true';
+ }
+
  function renderDetail(session) {
   const isDone = completed.has(session.id); app.innerHTML = `<main class="reader-shell"><nav class="reader-nav"><button id="back" class="back-button" type="button">← Catálogo</button><label class="check-wrap check-wrap--reader"><input id="detail-complete" type="checkbox" ${isDone ? 'checked' : ''}/><span>${isDone ? 'Realizada' : 'Marcar realizada'}</span></label></nav><header class="reader-header"><p class="eyebrow">${escapeHtml(session.song)} · Sesión ${session.session || '—'} · ${escapeHtml(session.duration)}</p><h1>${escapeHtml(session.title)}</h1><div class="session-meta reader-meta"><span class="chip">${escapeHtml(session.week)}</span>${session.focus ? `<span class="muted">${escapeHtml(session.focus)}</span>` : ''}</div></header><article class="markdown-body">${session.html}</article><footer class="reader-footer"><button id="footer-complete" class="primary-button" type="button">${isDone ? '✓ Sesión realizada' : 'Marcar sesión como realizada'}</button><p>Archivo: <code>${escapeHtml(session.filename)}</code></p></footer></main>`;
   document.querySelector('#back')?.addEventListener('click', () => { currentSessionId = null; render(); }); document.querySelector('#detail-complete')?.addEventListener('change', () => toggleCompleted(session.id)); document.querySelector('#footer-complete')?.addEventListener('click', () => toggleCompleted(session.id)); mountMusic(session);
 }
 function render() { destroyPlayers(); closeMusicModal(); const session = currentSessionId && sessions.find((item) => item.id === currentSessionId); session ? renderDetail(session) : renderList(); }
- window.addEventListener('pagehide', () => musicEngine.stop());
- const sessionCardObserver = new MutationObserver(activateSessionCards);
- sessionCardObserver.observe(app, { childList: true, subtree: true });
- render();
- activateSessionCards();
+app.addEventListener('click', (event) => {
+  const open = event.target.closest('[data-open]');
+  if (open) {
+    event.preventDefault();
+    event.stopPropagation();
+    navigateToSession(open.dataset.open);
+    return;
+  }
+  const back = event.target.closest('#back');
+  if (back) {
+    event.preventDefault();
+    event.stopPropagation();
+    navigateToCatalog();
+  }
+}, true);
+window.addEventListener('popstate', () => { currentSessionId = sessionIdFromUrl(); render(); });
+window.addEventListener('pagehide', () => musicEngine.stop());
+const sessionCardObserver = new MutationObserver(activateSessionCards);
+sessionCardObserver.observe(app, { childList: true, subtree: true });
+const readerNavigationObserver = new MutationObserver(activateReaderNavigation);
+readerNavigationObserver.observe(app, { childList: true, subtree: true });
+currentSessionId = sessionIdFromUrl();
+render();
+activateSessionCards();
+activateReaderNavigation();
