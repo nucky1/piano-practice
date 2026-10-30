@@ -86,19 +86,25 @@ function renderList() {
  }
 
  function activateReaderNavigation() {
-   const nav = app.querySelector('.reader-nav');
-   if (!nav || nav.dataset.navigationBound) return;
+   const footer = app.querySelector('.reader-footer');
+   if (!footer || footer.dataset.navigationBound) return;
    const current = sessions.find((session) => session.id === currentSessionId);
    if (!current) return;
    const songSessions = sessions.filter((session) => session.song === current.song).sort((a, b) => a.session - b.session);
    const index = songSessions.findIndex((session) => session.id === current.id);
-   const stepper = document.createElement('div');
-   stepper.className = 'session-stepper';
-   stepper.innerHTML = `<button type="button" data-session-step="prev" ${index <= 0 ? 'disabled' : ''}>← Anterior</button><span>${index + 1} / ${songSessions.length}</span><button type="button" data-session-step="next" ${index >= songSessions.length - 1 ? 'disabled' : ''}>Siguiente →</button>`;
-   stepper.querySelector('[data-session-step="prev"]')?.addEventListener('click', () => navigateBetweenSessions(-1));
-   stepper.querySelector('[data-session-step="next"]')?.addEventListener('click', () => navigateBetweenSessions(1));
-   nav.insertBefore(stepper, nav.querySelector('.check-wrap--reader'));
-   nav.dataset.navigationBound = 'true';
+   const previous = songSessions[index - 1];
+   const next = songSessions[index + 1];
+   const card = (session, direction, emptyTitle) => session
+     ? `<button type="button" class="session-nav-card" data-session-step="${direction}" aria-label="Abrir ${escapeHtml(session.title)}"><span class="session-nav-card__eyebrow">${direction === 'prev' ? '← Antes' : 'Después →'}</span><strong>${escapeHtml(session.title)}</strong><small>${escapeHtml(session.song)} · ${escapeHtml(session.focus || session.duration)}</small></button>`
+     : `<div class="session-nav-card is-empty"><span class="session-nav-card__eyebrow">${direction === 'prev' ? '← Inicio' : 'Fin →'}</span><strong>${emptyTitle}</strong><small>Ya estás en el límite de esta canción</small></div>`;
+   const navigation = document.createElement('nav');
+   navigation.className = 'session-nav-cards';
+   navigation.setAttribute('aria-label', 'Sesiones relacionadas');
+   navigation.innerHTML = `${card(previous, 'prev', 'Primera sesión')}<span class="session-nav-count">${index + 1} / ${songSessions.length}</span>${card(next, 'next', 'Última sesión')}`;
+   navigation.querySelector('[data-session-step="prev"]')?.addEventListener('click', () => navigateBetweenSessions(-1));
+   navigation.querySelector('[data-session-step="next"]')?.addEventListener('click', () => navigateBetweenSessions(1));
+   footer.append(navigation);
+   footer.dataset.navigationBound = 'true';
  }
 
  function renderDetail(session) {

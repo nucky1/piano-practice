@@ -16,8 +16,13 @@
 .session-card { cursor: pointer; }
 .session-card:focus-visible { outline: 2px solid #d8f36b; outline-offset: 3px; }
 .open-button { display: none; }
-.session-stepper { display: flex; align-items: center; gap: 10px; margin: 0 auto; color: #849084; font: 500 11px 'DM Mono', monospace; }
-.session-stepper button { padding: 8px 10px; border: 1px solid #303a32; background: #191c1a; color: #aab4a7; cursor: pointer; font: inherit; }
-.session-stepper button:hover:not(:disabled) { border-color: #d8f36b; color: #d8f36b; }
-.session-stepper button:disabled { cursor: not-allowed; opacity: .35; }
-@media (max-width: 640px) { .session-stepper { order: 3; width: 100%; justify-content: space-between; margin-top: 8px; } .reader-nav { flex-wrap: wrap; } }
+.session-nav-cards { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: stretch; margin-top: 30px; padding-top: 24px; border-top: 1px solid #303a32; }
+.session-nav-card { display: flex; min-height: 118px; flex-direction: column; align-items: flex-start; justify-content: center; padding: 17px; border: 1px solid #303a32; background: #191c1a; color: #f5f2eb; text-align: left; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
+.session-nav-card:hover { transform: translateY(-2px); border-color: #d8f36b; background: #242d21; }
+.session-nav-card strong { margin: 5px 0 7px; font-size: 15px; letter-spacing: -.025em; }
+.session-nav-card small { color: #849084; font-size: 11px; line-height: 1.4; }
+.session-nav-card__eyebrow { color: #d8f36b; font: 500 10px 'DM Mono', monospace; text-transform: uppercase; }
+.session-nav-card.is-empty { cursor: default; opacity: .5; }
+.session-nav-card.is-empty:hover { transform: none; border-color: #303a32; background: #191c1a; }
+.session-nav-count { align-self: center; color: #849084; font: 500 11px 'DM Mono', monospace; }
+@media (max-width: 640px) { .reader-nav { flex-wrap: wrap; } .session-nav-cards { grid-template-columns: 1fr 1fr; } .session-nav-count { grid-column: 1 / -1; grid-row: 1; order: -1; justify-self: center; } }
