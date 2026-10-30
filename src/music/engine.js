@@ -46,17 +46,19 @@ class MusicEngine {
 
     if (this.ready) return;
 
-    this.instrument = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'triangle' },
-      envelope: {
-        attack: 0.01,
-        decay: 0.12,
-        sustain: 0.55,
-        release: 0.45,
+    this.instrument = new Tone.Sampler({
+      urls: {
+        C4: 'C4.mp3',
+        'D#4': 'Ds4.mp3',
+        'F#4': 'Fs4.mp3',
+        A4: 'A4.mp3',
       },
+      baseUrl: 'https://tonejs.github.io/audio/salamander/',
+      release: 1.1,
     }).toDestination();
 
-    this.instrument.volume.value = -8;
+    this.instrument.volume.value = -7;
+    await Tone.loaded();
     this.ready = true;
   }
 

@@ -4,26 +4,26 @@ week: "2026-W44 · 26 oct–1 nov"
 song: Soy Favela
 session: 3
 duration: 35 min
-focus: Unir estrofa, subida y estribillo
+focus: Unir rueda, estrofa y estribillo
 ---
 
 # Sesión 3 — De la rueda a la canción
 
 ## Objetivo
 
-Armar una versión completa con la forma **intro · estrofa · estribillo · estrofa · estribillo**. El ciclo armónico se mantiene; la sensación cambia por dinámica y densidad.
+Armar una versión completa sobre el ciclo **Db · Eb · Fm · Cm**, a 86 BPM. La forma de práctica es **intro · estrofa · estribillo · estrofa · estribillo**. El contraste no viene de cambiar la armonía: viene de tocar el mismo ciclo con distinta densidad.
 
-1. Intro: dos vueltas a 72 BPM, acordes largos.
-2. Estrofa: cuatro vueltas a 82 BPM, mano derecha liviana.
-3. Estribillo: cuatro vueltas a 92 BPM, acentuá el primer pulso y abrí el registro.
-4. Grabá una toma sin detenerte. No corrijas acordes en el medio.
+1. Intro: una vuelta con bajo y acordes cortos.
+2. Estrofa: cuatro vueltas, derecha liviana y registro medio.
+3. Estribillo: cuatro vueltas, octavas suaves en la izquierda y acordes más abiertos.
+4. Dejá sonar los silencios entre ataques; no rellenes todos los pulsos.
 
-## Variación de textura
+## Textura
 
-- Estrofa: izquierda sola en pulsos 1 y 3; derecha en acordes cortos.
-- Estribillo: izquierda en octavas suaves; derecha con el acorde completo.
-- Si el tempo se cae, volvé a 82 BPM antes de seguir.
+- Estrofa: fundamental y quinta en la izquierda; triadas cortas en la derecha.
+- Estribillo: fundamental en octava en el primer pulso; acorde en contratiempo.
+- Pedal: apenas un cuarto de pedal por compás, o directamente sin pedal hasta que el pulso sea estable.
 
 ## Checkpoint
 
-Reconocés dónde empieza cada sección sin cambiar de tonalidad ni perder el ciclo.
+Podés recorrer la forma sin parar y el estribillo se siente más grande aunque sigas tocando Db · Eb · Fm · Cm.
