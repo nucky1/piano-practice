@@ -13,3 +13,6 @@
 @media (max-width: 900px) { .song-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .session-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .shell, .reader-shell { width: min(100% - 22px, 820px); padding-top: 30px; } .hero { grid-template-columns: 1fr; gap: 20px; } .progress-card { width: 100%; } .week-focus { align-items: start; flex-direction: column; padding: 22px; } .week-focus__meter { text-align: left; } .song-grid, .session-grid { grid-template-columns: 1fr; } .toolbar { grid-template-columns: 1fr; } .filters { overflow-x: auto; } .filter-button { min-height: 40px; } .session-card { min-height: 0; } .reader-nav { margin-bottom: 38px; } .check-wrap--reader span { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+.session-card { cursor: pointer; }
+.session-card:focus-visible { outline: 2px solid #d8f36b; outline-offset: 3px; }
+.open-button { display: none; }

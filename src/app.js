@@ -34,11 +34,35 @@ function renderList() {
   <section class="toolbar" aria-label="Buscar y filtrar sesiones"><label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar acorde, canción, ejercicio…" value="${escapeHtml(query)}"/></label><div class="filters" role="group" aria-label="Filtrar por estado"><button type="button" data-filter="all" class="filter-button ${filter === 'all' ? 'active' : ''}">Todas</button><button type="button" data-filter="pending" class="filter-button ${filter === 'pending' ? 'active' : ''}">Pendientes</button><button type="button" data-filter="done" class="filter-button ${filter === 'done' ? 'active' : ''}">Hechas</button></div></section>${filtered.length ? groupHtml : '<section class="empty-state"><h2>No encontré sesiones</h2><p>Probá con otra palabra, canción o filtro.</p></section>'}</main>`;
   document.querySelector('#search')?.addEventListener('input', (event) => { query = event.target.value; renderList(); const input = document.querySelector('#search'); input?.focus(); input?.setSelectionRange(query.length, query.length); });
   document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('click', () => { filter = b.dataset.filter; renderList(); })); document.querySelectorAll('[data-song]').forEach((b) => b.addEventListener('click', () => { selectedSong = b.dataset.song; renderList(); })); document.querySelectorAll('[data-toggle]').forEach((i) => i.addEventListener('change', () => toggleCompleted(i.dataset.toggle))); document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => { currentSessionId = b.dataset.open; window.scrollTo({ top: 0, behavior: 'smooth' }); render(); }));
-}
+ }
 
-function renderDetail(session) {
+ function activateSessionCards() {
+   document.querySelectorAll('.session-card').forEach((card) => {
+     if (card.dataset.cardBound) return;
+     card.dataset.cardBound = 'true';
+     card.tabIndex = 0;
+     card.setAttribute('role', 'button');
+     const open = () => card.querySelector('[data-open]')?.click();
+     card.addEventListener('click', (event) => {
+       if (event.target.closest('.check-wrap, [data-open]')) return;
+       open();
+     });
+     card.addEventListener('keydown', (event) => {
+       if (event.key !== 'Enter' && event.key !== ' ') return;
+       if (event.target.closest('.check-wrap, [data-open]')) return;
+       event.preventDefault();
+       open();
+     });
+   });
+ }
+
+ function renderDetail(session) {
   const isDone = completed.has(session.id); app.innerHTML = `<main class="reader-shell"><nav class="reader-nav"><button id="back" class="back-button" type="button">← Catálogo</button><label class="check-wrap check-wrap--reader"><input id="detail-complete" type="checkbox" ${isDone ? 'checked' : ''}/><span>${isDone ? 'Realizada' : 'Marcar realizada'}</span></label></nav><header class="reader-header"><p class="eyebrow">${escapeHtml(session.song)} · Sesión ${session.session || '—'} · ${escapeHtml(session.duration)}</p><h1>${escapeHtml(session.title)}</h1><div class="session-meta reader-meta"><span class="chip">${escapeHtml(session.week)}</span>${session.focus ? `<span class="muted">${escapeHtml(session.focus)}</span>` : ''}</div></header><article class="markdown-body">${session.html}</article><footer class="reader-footer"><button id="footer-complete" class="primary-button" type="button">${isDone ? '✓ Sesión realizada' : 'Marcar sesión como realizada'}</button><p>Archivo: <code>${escapeHtml(session.filename)}</code></p></footer></main>`;
   document.querySelector('#back')?.addEventListener('click', () => { currentSessionId = null; render(); }); document.querySelector('#detail-complete')?.addEventListener('change', () => toggleCompleted(session.id)); document.querySelector('#footer-complete')?.addEventListener('click', () => toggleCompleted(session.id)); mountMusic(session);
 }
 function render() { destroyPlayers(); closeMusicModal(); const session = currentSessionId && sessions.find((item) => item.id === currentSessionId); session ? renderDetail(session) : renderList(); }
-window.addEventListener('pagehide', () => musicEngine.stop()); render();
+ window.addEventListener('pagehide', () => musicEngine.stop());
+ const sessionCardObserver = new MutationObserver(activateSessionCards);
+ sessionCardObserver.observe(app, { childList: true, subtree: true });
+ render();
+ activateSessionCards();
